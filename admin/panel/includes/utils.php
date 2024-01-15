@@ -311,6 +311,7 @@ class AdminUtils
         return $response;
     }
 
+
     function addOrder($data)
     {
         $proCatId = htmlspecialchars($data["proCatId"]);
@@ -341,6 +342,69 @@ class AdminUtils
 
         return $response;
     }
+
+    function displayOrderData()
+    {
+        $query = "SELECT * FROM table_product";
+        $result = mysqli_query($this->conn, $query);
+        if (!$result) {
+            $response["code"] = "999";
+            $response["status"] = "false";
+            $response["msg"] = "no data";
+            return $response;
+        } else {
+            return $result;
+        }
+    }
+
+    function deleteOrder($id)
+    {
+        $catchImg = "SELECT * FROM table_product WHERE id='$id'";
+        $deleteResult = mysqli_query($this->conn, $catchImg);
+
+        if (!$deleteResult) {
+            $response["code"] = "999";
+            $response["status"] = "false";
+            $response["msg"] = "Error querying the database: " . mysqli_error($this->conn);
+            return $response;
+        }
+
+        if (mysqli_num_rows($deleteResult) > 0) {
+            $catInfoDelete = mysqli_fetch_assoc($deleteResult);
+            $deleteImgData = $catInfoDelete["pImage"];
+
+            $sql = "DELETE FROM table_product WHERE id=$id";
+            $result = mysqli_query($this->conn, $sql);
+
+            if (!$result) {
+                $response["code"] = "999";
+                $response["status"] = "false";
+                $response["msg"] = "Failed to delete category: " . mysqli_error($this->conn);
+            } else {
+                
+                $filePath =  __DIR__ . '/../product/uploads/' . $deleteImgData;
+
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+
+                $response["code"] = "200";
+                $response["status"] = "true";
+                $response["msg"] = "Category deleted successfully";
+            }
+        } else {
+            $response["code"] = "404";
+            $response["status"] = "false";
+            $response["msg"] = "Category not found in the database";
+            header("Location: manageProduct.php");
+        }
+
+        return $response;
+    }
+
+    
+
+
 
 
 
