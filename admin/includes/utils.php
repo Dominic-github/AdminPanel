@@ -59,7 +59,6 @@
     {
         $username = htmlspecialchars($data["username"]);
         $password = $data["password"];
-        $id = 0;
 
         // Check if the input is an email
         $isEmail = filter_var($username, FILTER_VALIDATE_EMAIL);
@@ -73,19 +72,12 @@
 
         $result = mysqli_query($this->conn, $sql);
 
-        while($row = mysql_fetch_array($result, MYSQL_ASSOC))
-        {
-           $id = $row['id'];
-        }
-
         if (mysqli_num_rows($result) > 0) {
-            $response["id"] = id;
             $response["code"] = "200";
-            $response["msg"] = "Login successful".id;
+            $response["msg"] = "Login successful";
 
 
         } else {    
-            $response["id"] = 0;
             $response["code"] = "999";
             $response["msg"] = "Invalid credentials";
         }
