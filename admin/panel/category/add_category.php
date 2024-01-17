@@ -1,4 +1,5 @@
-<?php include("../includes/header.php");  ?>
+<?php include("../includes/header.php"); ?>
+
 <?php
 
 $showAlert = false;
@@ -7,6 +8,7 @@ include("../includes/utils.php");
 $utils = new AdminUtils();
 
 if (isset($_POST["submit"])) {
+
     $result = $utils->addCategory($_POST);
 
     if ($result["status"] === "true") {

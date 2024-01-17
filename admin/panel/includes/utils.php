@@ -2,7 +2,7 @@
 
 class AdminUtils
 {
-    private $conn;
+    private  $conn;
     public function __construct()
     {
         $DB_NAME = "shop";
@@ -314,38 +314,84 @@ class AdminUtils
 
     function addOrder($data)
     {
-        $proCatId = htmlspecialchars($data["proCatId"]);
-        $proName = htmlspecialchars($data["proName"]);
-        $proDesc = htmlspecialchars($data["proDesc"]);
-        $proPrice = htmlspecialchars($data["proPrice"]);
-        $proImage = $_FILES['proImage']['name'];
-        $tmp_name = $_FILES['proImage']['tmp_name'];
+        $userId = $data["userId"] ? $data["userId"] : 1;
+        $amount = $data["amount"] ? $data["amount"] : 2831000;
+        $quantity_list = $data["quantity"] ?  $data["quantity"] : [5,3,2,3,1];
+        $order_status = "true";
+        $productIdList = $data["productIdList"] ? $data["productIdList"] : '1,2,3,4,5';
+
+        $orderImage = $_FILES['orderImg']['name'];
+        $tmp_name = $_FILES['orderImg']['tmp_name'];
+
+        $createOrder = "INSERT INTO `table_order`(userId, amount, orderImage, order_status) VALUES 
+                        ('$userId', '$amount', '$orderImage' , '$order_status');         
+        ";
+
+        $last_id = 0;
 
 
-        $sql = "INSERT INTO table_product(cat_id, pName, pDesc, pImage, pPrice, pStatus) VALUES('$proCatId','$proName','$proDesc', '$proImage', '$proPrice', 'true')";
-
-
-
-        $result = mysqli_query($this->conn, $sql);
-
-        if (!$result) {
+        $result = mysqli_query($this->conn, $createOrder);
+        
+        
+        if(!$result){
             $response["code"] = "999";
             $response["status"] = "false";
             $response["msg"] = "Failed to insert data!";
-        } else {
+            return $response;
+            
+        }else{
+            if (!$result) {
+                $response["code"] = "999";
+                $response["status"] = "false";
+                $response["msg"] = "Failed to insert data!";
+                return $response;
+            } else {
 
-            move_uploaded_file($tmp_name, __DIR__ . '/../product/uploads/' . $proImage);
-            $response["code"] = "200";
-            $response["status"] = "true";
-            $response["msg"] = "Registration successed";
+                $last_id =  $this->conn->insert_id;
+            }
         }
 
+        # Create Order_deltail   
+        $getProduct= mysqli_query($this->conn,"SELECT *  FROM `table_product` where id in ($productIdList) ");
+        $resultOrderDetail = "";
+
+        $index = 0;
+        while($row = mysqli_fetch_assoc($getProduct)){
+            $product_id = $row['id'];
+            $product_name = $row['pName'];
+            $product_price = $row['pPrice'];
+            $quantity = $quantity_list[$index];
+            $subtotal = $quantity * $product_price;
+
+        
+            $createOrderDeltail = "INSERT INTO `table_order_detail` (order_id, product_id, pName, price_item, quantity, sub_total) VALUES 
+            ('$last_id', '$product_id', '$product_name', '$product_price', '$quantity', '$subtotal')";
+            
+            if(!mysqli_query($this->conn, $createOrderDeltail)){
+                $response["code"] = "999";
+                $response["status"] = "false";
+                $response["msg"] = "Failed to insert data!";
+                return $response;
+            }else {
+                $response["code"] = "200";
+                $response["status"] = "true";
+                $response["msg"] = "Insert Order successed";
+            }
+
+            $index++;
+          }
+
+
+        move_uploaded_file($tmp_name, __DIR__ . '/../order/uploads/' . $orderImage);
         return $response;
     }
 
+
     function displayOrderData()
     {
-        $query = "SELECT * FROM table_product";
+        $query = "SELECT *  FROM  `table_order` 
+                  ORDER BY 	`table_order` .created_at DESC";
+
         $result = mysqli_query($this->conn, $query);
         if (!$result) {
             $response["code"] = "999";
@@ -359,53 +405,63 @@ class AdminUtils
 
     function deleteOrder($id)
     {
-        $catchImg = "SELECT * FROM table_product WHERE id='$id'";
-        $deleteResult = mysqli_query($this->conn, $catchImg);
+        $orderId = "SELECT * FROM table_order WHERE id='$id'";
+        $resultGetId = mysqli_query($this->conn, $orderId);
 
-        if (!$deleteResult) {
+
+        if (!$resultGetId) {
             $response["code"] = "999";
             $response["status"] = "false";
             $response["msg"] = "Error querying the database: " . mysqli_error($this->conn);
             return $response;
         }
 
-        if (mysqli_num_rows($deleteResult) > 0) {
-            $catInfoDelete = mysqli_fetch_assoc($deleteResult);
-            $deleteImgData = $catInfoDelete["pImage"];
+        if (mysqli_num_rows($resultGetId) > 0) {
 
-            $sql = "DELETE FROM table_product WHERE id=$id";
-            $result = mysqli_query($this->conn, $sql);
+            $catInfoDelete = mysqli_fetch_assoc($resultGetId);
+            $deleteImgData = $catInfoDelete["orderImage"];
 
-            if (!$result) {
+            $deleteOder = "DELETE FROM table_order WHERE id = '$id' ";
+            $deleteOderDetail = " DELETE FROM table_order_detail WHERE order_id = '$id' ";
+
+            $resultDeleteOrder = mysqli_query($this->conn, $deleteOder);
+
+            if (!$resultDeleteOrder) {
                 $response["code"] = "999";
                 $response["status"] = "false";
-                $response["msg"] = "Failed to delete category: " . mysqli_error($this->conn);
-            } else {
+                $response["msg"] = "Failed to delete order: " . mysqli_error($this->conn);
+                return $response;
                 
-                $filePath =  __DIR__ . '/../product/uploads/' . $deleteImgData;
+                
+            } else {
+                $resultDeleteOrderDetail = mysqli_query($this->conn, $deleteOderDetail);
 
-                if (file_exists($filePath)) {
-                    unlink($filePath);
+                if(!$resultDeleteOrderDetail){
+                    $response["code"] = "999";
+                    $response["status"] = "false";
+                    $response["msg"] = "Failed to delete order: " . mysqli_error($this->conn);
+                    return $response;
+                }else{
+                    $filePath =  __DIR__ . '/../order/uploads/' . $deleteImgData;
+
+                    if (file_exists($filePath)) {
+                        unlink($filePath);
+                    }
+                    $response["code"] = "200";
+                    $response["status"] = "true";
+                    $response["msg"] = "Order deleted successfully";
+                    header("Location: managerOrder.php");
                 }
-
-                $response["code"] = "200";
-                $response["status"] = "true";
-                $response["msg"] = "Category deleted successfully";
             }
         } else {
             $response["code"] = "404";
             $response["status"] = "false";
-            $response["msg"] = "Category not found in the database";
-            header("Location: manageProduct.php");
+            $response["msg"] = "Order not found in the database";
+            header("Location: managerOrder.php");
         }
 
         return $response;
     }
-
-    
-
-
-
 
 
 }

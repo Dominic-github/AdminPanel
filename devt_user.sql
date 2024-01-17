@@ -23,12 +23,12 @@ DROP TABLE IF EXISTS `admin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `admin` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `username` nvarchar(255) NOT NULL,
   `email` nvarchar(255) NOT NULL,
   `password` nvarchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -49,13 +49,13 @@ DROP TABLE IF EXISTS `table_cat`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `table_cat` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `catName` nvarchar(255) NOT NULL,
   `catDesc` nvarchar(255) NOT NULL,
   `catImg` nvarchar(255) NOT NULL,
   `catStatus` nvarchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -87,15 +87,15 @@ DROP TABLE IF EXISTS `table_product`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `table_product` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
-  `cat_id` int(255) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cat_id` int NOT NULL,
   `pName` nvarchar(255) NOT NULL,
   `pDesc` nvarchar(255) NOT NULL,
   `pImage` text NOT NULL,
-  `pPrice` int(255) NOT NULL,
+  `pPrice` int NOT NULL,
   `pStatus` nvarchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -183,7 +183,7 @@ DROP TABLE IF EXISTS `table_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `table_user` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
   `name` nvarchar(255) NOT NULL,
   `username` nvarchar(255) NOT NULL,
   `email` nvarchar(255) NOT NULL,
@@ -217,20 +217,23 @@ DROP TABLE IF EXISTS `table_order`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `table_order` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
-  `userId` int(255) NOT NULL,
-  `amount` int(255) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL,
+  `amount` int NOT NULL,
+  `orderImage` text NOT NULL,
   `created_at` Date DEFAULT CURRENT_TIMESTAMP NOT NULL,
   `order_status` nvarchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 LOCK TABLES `table_order` WRITE;
 /*!40000 ALTER TABLE `table_order` DISABLE KEYS */;
 INSERT INTO `table_order` VALUES 
-(1,1,2630000,CURRENT_TIMESTAMP,"true");
+(1,1,2831000,'order1.jpg',CURRENT_TIMESTAMP,"true");
 /*!40000 ALTER TABLE `table_order` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
 
 
 
@@ -242,24 +245,27 @@ DROP TABLE IF EXISTS `table_order_detail`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `table_order_detail` (
-  `id` int(255) NOT NULL AUTO_INCREMENT,
-  `order_id` int(255) NOT NULL,
-  `product_id` int(255) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `product_id` int NOT NULL,
   `pName` nvarchar(255) NOT NULL,
-  `price_item` int(255) NOT NULL,
+  `price_item` int NOT NULL,
+  `quantity` int NOT NULL,
+  `sub_total` int NOT NULL,
+
   `created_at` Date DEFAULT CURRENT_TIMESTAMP NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 LOCK TABLES `table_order_detail` WRITE;
 /*!40000 ALTER TABLE `table_order_detail` DISABLE KEYS */;
 
 INSERT INTO `table_order_detail` VALUES 
-(1,1,1,"Stylish shirt for boys",500000,CURRENT_TIMESTAMP),
-(2,1,2,"Red Stylish shirt for boys",600000,CURRENT_TIMESTAMP),
-(3,1,3,"Matte Black Stylish shirt for boys",580000,CURRENT_TIMESTAMP),
-(4,1,4,"Chek Stylish shirt for boys",450000,CURRENT_TIMESTAMP),
-(5,1,5,"Casual Stylish shirt for boys",500000,CURRENT_TIMESTAMP);
+(1,1,1,"Áo khoá nỉ mũ hai lớp logo WASK nỉ lót bông form thụng",53000,5,265000,CURRENT_TIMESTAMP),
+(2,1,2,"Quần jean nam vá da boy phố thêu",138000,3,414000,CURRENT_TIMESTAMP),
+(3,1,3,"Áo phông nam nữ Tommy Hilfiger",234000,2,468000,CURRENT_TIMESTAMP),
+(4,1,4,"Thắt lưng nam da cao cấp",453000,3,1359000,CURRENT_TIMESTAMP),
+(5,1,5,"Áo thun Fafic",325000,1,325000,CURRENT_TIMESTAMP);
 
 /*!40000 ALTER TABLE `table_order_detail` ENABLE KEYS */;
 UNLOCK TABLES;
